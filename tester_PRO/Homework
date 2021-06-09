@@ -1,0 +1,114 @@
+CREATE SCHEMA IF NOT EXISTS courses DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_polish_ci;
+use courses;
+CREATE TABLE IF NOT EXISTS course_name(
+id BIGINT(20) NOT NULL auto_increment,
+VALUE VARCHAR(255) NOT NULL unique ,
+PRIMARY KEY (id) );
+
+CREATE TABLE IF NOT EXISTS course_status(
+id BIGINT(20) NOT NULL auto_increment,
+value VARCHAR (255) not null unique,
+PRIMARY KEY (id) );
+
+CREATE TABLE IF NOT EXISTS city (
+id BIGINT(20) NOT NULL auto_increment,
+value VARCHAR(255) NOT NULL ,
+PRIMARY KEY (id) );
+
+
+CREATE TABLE IF NOT EXISTS location(
+id BIGINT(20) NOT NULL auto_increment,
+name VARCHAR (255) NOT NULL UNIQUE,
+postal_code VARCHAR (255) NOT NULL ,
+street VARCHAR (255) NOT NULL,
+city_id BIGINT(20) NOT NULL ,
+PRIMARY KEY (id),
+FOREIGN KEY (city_id) REFERENCES city (id) );
+
+CREATE TABLE course (
+id BIGINT(20) NOT NULL auto_increment,
+code VARCHAR(255) NOT NULL UNIQUE,
+price DECIMAL (8,2) NOT NULL,
+course_name_id BIGINT(20),
+course_status_id BIGINT(20),
+location_id BIGINT(20),
+PRIMARY KEY (id),
+FOREIGN KEY (course_name_id) REFERENCES course_name(id),
+FOREIGN KEY (course_status_id) REFERENCES course_status(id),
+FOREIGN KEY (location_id) REFERENCES location(id) );
+
+CREATE TABLE attendee(
+id BIGINT(20) NOT NULL auto_increment ,
+first_name VARCHAR(255) NOT NULL,
+last_name VARCHAR (255) NOT NULL,
+pesel VARCHAR (255) NOT NULL UNIQUE,
+PRIMARY KEY (id) );
+
+
+
+CREATE TABLE course_attendee (
+course_id BIGINT(20) NOT NULL ,
+attendee_id BIGINT(20) NOT NULL,
+FOREIGN KEY (course_id) REFERENCES course(id),
+FOREIGN KEY (attendee_id) REFERENCES attendee(id));
+
+CREATE TABLE trainer(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+first_name VARCHAR(255) NOT NULL,
+last_name VARCHAR(255) NOT NULL,
+pesel VARCHAR(255) NOT NULL UNIQUE,
+PRIMARY KEY (id));
+
+CREATE TABLE classes(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+end DATETIME(6) NOT NULL,
+start DATETIME(6) NOT NULL,
+module_id BIGINT(20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (module_id) REFERENCES module(id));
+
+CREATE TABLE presence(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+date DATE NOT NULL,
+type VARCHAR(255) not NULL,
+attendee_id BIGINT(20) NOT NULL,
+classes_id BIGINT(20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (attendee_id) REFERENCES attendee(id),
+FOREIGN KEY (classes_id) REFERENCES classes(id));
+
+CREATE TABLE questionnaire(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+date DATE NOT NULL,
+attendee_id BIGINT(20) NOT NULL,
+module_id BIGINT (20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (attendee_id) REFERENCES attendee(id),
+FOREIGN KEY (module_id) REFERENCES module(id));
+
+
+CREATE TABLE module(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+hours INT(11) NOT NULL,
+name VARCHAR(255) NOT NULL,
+course_id BIGINT(20) NOT NULL,
+trainer_id BIGINT(20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (course_id) REFERENCES course(id),
+FOREIGN KEY(trainer_id) REFERENCES trainer(id));
+
+CREATE TABLE open_question (
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+answer VARCHAR(255) NOT NULL,
+description VARCHAR(255) NOT NULL,
+questionnaire_id BIGINT(20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (questionnaire_id) REFERENCES questionnaire(id));
+
+CREATE TABLE rating_question(
+id BIGINT(20) NOT NULL AUTO_INCREMENT,
+description VARCHAR(255) NOT NULL,
+value INT(11) NOT NULL,
+questionnaire_id BIGINT(20) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (questionnaire_id) REFERENCES questionnaire(id));
