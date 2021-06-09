@@ -1,0 +1,97 @@
+-- 1 Pobierz moduły które mają 28 godzin./ Get modules that last 28 hours
+SELECT * FROM module WHERE hours = 28;
+
+-- 2 Pobierz kursy których cena jest wyższa niż 6000 zł. / Get courses, whose prices are higher than 6000 PLN
+SELECT * FROM course WHERE price > 6000;
+
+-- 3 Pobierz lokalizacje, których kod pocztowy zaczyna się na 8 / Get location with a zip code beginning with 8
+SELECT * FROM location WHERE postal_code LIKE '8%';
+
+-- 4 Pobierz uczestników, których PESEL zawiera na drugiej pozycji 5 i na przedostatniej 6 / Get attendees  , whose id include 5 on second position and 6 is penultimate.
+SELECT * FROM attendee WHERE pesel LIKE '_5%6_';
+
+
+
+-- 5 Pobierz kursy których status to 'W trakcie' / Get courses whose status is "In progress"
+SELECT * FROM course c 
+JOIN course_status cs ON cs.id = c.course_status_id
+WHERE cs.value = 'W trakcie';
+
+-- 6 Pobierz kursy, które mają kursanta o imieniu Anna / Get courses with a student named Anna
+SELECT * FROM course c 
+JOIN course_attendee ca ON c.id = ca.course_id
+JOIN attendee a ON a.id = ca.attendee_id
+WHERE a.first_name = 'Anna';
+
+-- 7 Pobierz unikalne nazwy modułów na kursie którego cena jest większa niż 5000. / Get unique names of modules in course which price is higher than 5000.
+SELECT DISTINCT(name) FROM module m 
+JOIN course c ON m.course_id = c.id
+WHERE c.price > 6000;
+
+-- 8 Pobierz dane lokalizacji w Łodzi na ulicy Prusa. / Get location data in Łódź on Prusa street.
+SELECT * FROM location l
+JOIN city ci ON l.city_id = ci.id
+WHERE ci.value = 'Łódź' AND l.street LIKE '%Prusa%';
+
+-- 9 Pobierz trenerów modułu 'Projekt końcowy' i których nazwisko nie zaczyna się na 'M'. / Get  trainers for 'Final Project' module and whose surnames doesn't start with M.
+SELECT t.* FROM trainer t 
+JOIN module m ON m.trainer_id = t.id
+WHERE m.name = 'Projekt końcowy' AND t.last_name NOT LIKE 'M%';
+
+-- 10 Pobierz uczestników przypisanych do kursu Tester Oprogramowania PRO. / Get attendees assigned to Software Tester PRO course.
+SELECT a.* FROM course c 
+JOIN course_attendee ca ON c.id = ca.course_id
+JOIN attendee a ON a.id = ca.attendee_id
+JOIN course_name cn ON cn.id = c.course_name_id
+WHERE cn.value = 'Tester Oprogramowania PRO';
+
+
+-- 11 Pobierz kursy, które mają przypisanego trenera o imieniu Sławomir. / Get courses that have an assigned trainer named Sławomir.
+SELECT * FROM course c 
+JOIN module m ON m.course_id = c.id
+JOIN trainer t ON t.id = m.trainer_id
+WHERE t.first_name = 'Sławomir';
+
+-- 12 Pobierz dane wszystkich kursów w Gdańsku / Get data of all courses in Gdańsk
+SELECT * FROM course c
+JOIN location l ON c.location_id = l.id
+JOIN city ci ON l.city_id = ci.id
+WHERE ci.value = 'Gdańsk';
+
+-- 13 Pobierz dane o liczbie kursów w każdym z miast - zaprezentuj 'miasto', 'liczba kursów'. / Get data on the number of courses in each city - present the 'city', 'number of courses'.
+
+SELECT ci.value AS miasto, COUNT(c.id) AS 'liczba kursów' FROM course c 
+JOIN course_name cn ON c.course_name_id = cn.id
+JOIN location l ON l.id = c.location_id
+JOIN city ci ON l.city_id = ci.id
+GROUP BY ci.id;
+
+
+-- 14 Pobierz kursy w Gdańsku, które mają minimum trzech uczestników / Get courses in Gdańsk in which there are at least 3 attendees.
+SELECT c.*, c.code, ci.value, COUNT(a.id) FROM course c 
+JOIN course_attendee ca ON c.id = ca.course_id
+JOIN attendee a ON a.id = ca.attendee_id
+JOIN location l ON c.location_id = l.id
+JOIN city ci ON l.city_id = ci.id
+WHERE ci.value = 'Gdańsk'
+GROUP BY c.code
+HAVING COUNT(a.id) > 3;
+
+
+-- 15 Pobierz trenera, który ma przypisaną największą liczbę kursów (nie modułów, ale kursów) - może być ich kilku, którzy mają tyle samo./ Get trainer, who has been assigned most number of courses ( not modules) - 
+                                                                                                                                            there can be several who have the same number.
+SELECT t.*, COUNT(DISTINCT c.id) AS quantity FROM course c 
+JOIN module m ON m.course_id = c.id
+JOIN trainer t ON t.id = m.trainer_id
+GROUP BY t.id
+HAVING COUNT(DISTINCT c.id) = 
+	(SELECT MAX(grouped.quantity) FROM (
+		SELECT t.*, COUNT(DISTINCT c.id) AS quantity FROM course c 
+		JOIN module m ON m.course_id = c.id
+		JOIN trainer t ON t.id = m.trainer_id
+		GROUP BY t.id) AS grouped);
+
+
+
+
+
