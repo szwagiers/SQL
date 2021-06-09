@@ -1,0 +1,151 @@
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+DROP SCHEMA IF EXISTS shopping;
+CREATE SCHEMA IF NOT EXISTS shopping DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_polish_ci; 
+USE shopping;
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+-- utwórz tabelę 'shopper' z atrybutami 'first_name' i 'last_name' po 45 znaków
+-- create table 'shopper' with 'first_name' i 'last_name' attributes , 45 characters long
+CREATE TABLE shopper (
+  first_name VARCHAR(45),
+  last_name VARCHAR(45) 
+);
+
+-- dodaj atrybuty 'id' i 'nr_pesel' (oba liczba całkowita) 
+-- add attributes 'id' and 'nr_pesel) ( both integers)
+ALTER TABLE shopper ADD (
+    id INT(10), 
+    nr_pesel INT(11)
+);
+
+-- zmodyfikuj 'nr_pesel' na ciąg znaków stałej dł. 11 oraz 'id' na liczbę całk. o dł. 20
+-- modify 'nr_pesel' to string with constant length of 11 character and 'id' to integer 20 digits long.
+ALTER TABLE shopper MODIFY nr_pesel CHAR(11);
+ALTER TABLE shopper MODIFY id BIGINT(20);
+
+-- zmień nazwę kolumny 'nr_pesel' na 'pesel'  
+-- change column name from 'nr_pesel' to 'pesel'
+ALTER TABLE shopper RENAME COLUMN nr_pesel TO pesel;
+
+-- usuń kolumnę 'first_name'
+-- delete 'first_name' column
+ALTER TABLE shopper DROP first_name;
+
+-- zmień nazwę tabeli z 'shopper' na 'customer'
+-- change table name from ' shopper' to 'customer'
+RENAME TABLE shopper TO customer;
+
+-- usuń tabelę 'customer'
+-- delete 'customer' table
+DROP TABLE customer;
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+-- utwórz tabelę 'customer' z atrybutami z poprzedniego polecenia / create 'customer' table with attributes from last exercise
+-- id - liczba całkowita o dł. 20 . integere 20 digits long
+-- first_name - ciąg znaków o zmiennej długości do 45 znaków / string with variable length of 45 characters
+-- last_name - ciąg znaków o zmiennej długości do 45 znaków / string with variable length of 45 characters
+-- pesel - unikalny ciąg znaków o stałej długości do 45 znaków / unique string with constant length of 45 characters
+-- ustaw 'id' jako klucz główny / set 'id' as primary key
+CREATE TABLE customer (
+  id BIGINT(20), 
+  first_name VARCHAR(45),
+  last_name VARCHAR(45),
+  pesel CHAR(11) UNIQUE,
+  PRIMARY KEY (id)
+);
+
+-- utwórz tabelę 'loyalty_card' / create taable 'loyalty_card'
+-- customer_id BIGINT(20) - klucz główny i jednocześnie klucz obcy / primary ket and foreign key at the same time
+-- code VARCHAR(10) - (kod firmowy karty) wymagany, unikalny / mandatory and unique
+-- discount TINYINT(2) - (zniżka) wymagany, wartość mniejsza niż 10, domyślna wartość 3 / mandatory, value lower than 10, default 3
+-- valid_from DATE - (ważna od) wymagany / mandatory
+-- valid_to DATE - (ważna do) wymagany / mandatory
+-- stwórz powiązanie ONE-TO-ONE tabeli 'customer' z tabelą 'loyalty_card' (1 klient ma 1 kartę) / associate ONE-TO-ONE table 'customer' with table 'loyalty_card'
+CREATE TABLE loyalty_card (
+  customer_id BIGINT(20) UNIQUE NOT NULL,
+  code VARCHAR(10) UNIQUE NOT NULL,
+  discount TINYINT(2) NOT NULL DEFAULT 3 CHECK (discount <= 10),
+  valid_date DATE NOT NULL,
+  PRIMARY KEY (customer_id),
+  FOREIGN KEY (customer_id) REFERENCES customer (id)
+);
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+-- utwórz tabelę 'shop' / create 'shop' table
+-- id BIGINT(20) - klucz główny zwiększający się automatycznie o 1, użyj słowa kluczowego AUTO_INCREMENT po typie danych / primary key that automatically increases by 1, use the AUTO_INCREMENT keyword after the data type
+-- name VARCHAR(20) - wymagany, unikalny / mandatory, unique
+-- code VARCHAR(10) - wymagany, unikalny / mandatory, unique
+-- address VARCHAR(50)
+CREATE TABLE shop (
+  id BIGINT(20) AUTO_INCREMENT,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  code VARCHAR(10) UNIQUE NOT NULL,
+  address VARCHAR(50),
+  PRIMARY KEY (id)
+);
+
+-- utwórz tabelę 'purchase' / create table 'purchase'
+-- id BIGINT(20) - klucz główny, auto increment / primary key, auto increment
+-- purchased_date DATE - wymagany / mandatory
+-- product_name VARCHAR(50) - wymagany / mandatory
+-- quantity INT - wymagany / mandatory
+-- price_per_piece DECIMAL(6,2) - wymagany / mandatory
+-- stwórz powiązanie ONE-TO-MANY tabeli 'shop' z tabelą 'purchase' (1 sklep ma M powiązanych zakupów, 1 zakup ma 1 powiązany sklep) /associate ONE-TO-ONE table 'shop' with table 'purchase'
+CREATE TABLE purchase (
+  id BIGINT(20) AUTO_INCREMENT,
+  shop_id BIGINT(20) NOT NULL,
+  purchased_date DATE NOT NULL,
+  product_name VARCHAR(50) NOT NULL,
+  quantity INT NOT NULL,
+  price_per_piece DECIMAL(6,2) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (shop_id) REFERENCES shop (id)
+);
+
+-- dodaj powiązanie ONE-TO-MANY tabeli 'customer' z tabelą 'purchase' (1 klient ma M powiązanych zakupów, 1 zakup ma 1 powiązanego klienta) / add association ONE-TO-ONE table 'customer' with table 'purchase'
+ALTER TABLE purchase ADD (customer_id BIGINT(20) NOT NULL); 
+ALTER TABLE purchase ADD FOREIGN KEY (customer_id) REFERENCES customer (id);
+
+
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+-- utwórz tabelę 'payment_method' / create table 'payment_method'
+-- id BIGINT(20) - klucz główny, auto increment / primary ket, auto increment
+-- code CHAR(1) - wymagany, unikalny / mandatory , unique
+-- description VARCHAR(30) - wymagany / mandatory
+CREATE TABLE payment_method (
+  id BIGINT(20) AUTO_INCREMENT,
+  code CHAR(1) UNIQUE NOT NULL,
+  description VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+-- stwórz powiązanie MANY-TO-MANY tabeli 'shop' z tabelą 'payment_method' (sklepów ma N powiązanych metod płatności) /associate MANY-TO-MANY table 'shop' with table 'payment_method'
+-- w tym celu stwórz tabelę  'shop_payment_method' i zamodeluj powiązanie wykorzystując klucze / For this purpose create table 'shop_payment_method' and create association using keys
+-- tabela powinna zawierać również informację o użytkowniku który wprowadził rekord oraz datę i czas wprowadzenia rekordu / table shold include also information about user who inserted record and date with time of inserting record
+CREATE TABLE shop_payment_method (
+  shop_id BIGINT(20),
+  payment_method_id BIGINT(20),
+  created_by VARCHAR(20) NOT NULL,
+  created_date DATETIME NOT NULL,
+  PRIMARY KEY (shop_id, payment_method_id),
+  FOREIGN KEY (shop_id) REFERENCES shop (id),
+  FOREIGN KEY (payment_method_id) REFERENCES payment_method (id)
+);
+
+
+
+
+
+
+
+
