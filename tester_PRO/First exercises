@@ -1,0 +1,285 @@
+CREATE DATABASE tester_PRO;
+use tester_PRO;
+
+-- creating tables for later practice and exercises
+CREATE TABLE customer (
+  id BIGINT(20), 
+  first_name VARCHAR(45) NOT NULL,
+  last_name VARCHAR(45) NOT NULL,
+  pesel CHAR(11) UNIQUE,
+  gender ENUM('M', 'K'),
+  type ENUM('REGULAR', 'SILVER', 'GOLD'),
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE loyalty_card (
+  customer_id BIGINT(20) UNIQUE NOT NULL,
+  code VARCHAR(10) UNIQUE NOT NULL,
+  discount TINYINT(2) NOT NULL DEFAULT 3 CHECK (discount <= 10),
+  valid_date DATE NOT NULL,
+  PRIMARY KEY (customer_id),
+  FOREIGN KEY (customer_id) REFERENCES customer (id)
+);
+
+CREATE TABLE shop (
+  id BIGINT(20) AUTO_INCREMENT,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  code VARCHAR(10) UNIQUE NOT NULL,
+  address VARCHAR(50),
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE purchase (
+  id BIGINT(20) AUTO_INCREMENT,
+  shop_id BIGINT(20) NOT NULL,
+  customer_id BIGINT(20) NOT NULL,
+  purchased_date DATE NOT NULL,
+  product_name VARCHAR(50) NOT NULL,
+  quantity INT NOT NULL,
+  price_per_piece DECIMAL(6,2) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (shop_id) REFERENCES shop (id),
+  FOREIGN KEY (customer_id) REFERENCES customer (id)
+);
+
+CREATE TABLE payment_method (
+  id BIGINT(20) AUTO_INCREMENT,
+  code CHAR(1) UNIQUE NOT NULL,
+  description VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE shop_payment_method (
+  shop_id BIGINT(20),
+  payment_method_id BIGINT(20),
+  created_by VARCHAR(20) NOT NULL,
+  created_date DATETIME NOT NULL,
+  PRIMARY KEY (shop_id, payment_method_id),
+  FOREIGN KEY (shop_id) REFERENCES shop (id),
+  FOREIGN KEY (payment_method_id) REFERENCES payment_method (id)
+);
+
+-- insterting data into tables
+
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (1, 'Tomasz', 'Kowalski', '12312312311');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (2, 'Monika', 'Adamiec', '66611166611');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (3, 'Marek', 'Koniarek', '44334433443');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (4, 'Joanna', 'Kos', '88998811771');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (5, 'Irena', 'Belka', '5463781221');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (6, 'Tomasz', 'Krokocki', '55455455466');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (7, 'Joanna', 'Wojtala', '35463781221');
+INSERT INTO customer (id, first_name, last_name, pesel) VALUES (8, 'Jakub', 'Janicki', '44455566611');
+
+INSERT INTO loyalty_card (customer_id, code, discount, valid_date) VALUES (1, 'CARD0001', 8, '2019-02-02');
+INSERT INTO loyalty_card (customer_id, code, discount, valid_date) VALUES (2, 'CARD0002', 10, '2019-02-02');
+INSERT INTO loyalty_card (customer_id, code, discount, valid_date) VALUES (3, 'CARD0003', 5, '2019-05-15');
+INSERT INTO loyalty_card (customer_id, code, discount, valid_date) VALUES (4, 'CARD0004', 7, '2019-05-15');
+INSERT INTO loyalty_card (customer_id, code, discount, valid_date) VALUES (5, 'CARD0005', 9, '2019-07-22');
+
+INSERT INTO shop (name, code, address) VALUES ('Reserved', 'R01', 'Hallera 23, Gdańsk');
+INSERT INTO shop (name, code, address) VALUES ('Zara', 'Z01', 'Konstytucji 7, Gdynia');
+INSERT INTO shop (name, code, address) VALUES ('Mohito', 'M01', 'Kwarcowa 12, Gdynia');
+INSERT INTO shop (name, code, address) VALUES ('Bershka', 'B01', 'Kwadatowa 12, Gdynia');
+INSERT INTO shop (name, code) VALUES ('Van Graaf', 'VG01');
+INSERT INTO shop (name, code) VALUES ('Peek', 'P01');
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 1, '2019-01-01', 'koszula', 2, 99.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 1, '2019-01-01', 'koszula', 1, 79.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 1, '2019-01-01', 'koszula', 3, 119.99);
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 1, '2019-02-01', 'podkoszulka', 5, 12.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 2, '2019-03-01', 'podkoszulka', 1, 33.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 3, '2019-04-01', 'podkoszulka', 3, 69.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 4, '2019-05-01', 'podkoszulka', 3, 49.99);
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 5, '2019-04-12', 'podkoszulka', 2, 12.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 1, '2019-07-11', 'podkoszulka', 3, 33.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 1, '2019-03-01', 'podkoszulka', 2, 69.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 2, '2019-02-02', 'podkoszulka', 2, 49.99);
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 5, '2019-03-12', 'spódnica', 1, 199.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 1, '2019-04-11', 'spódnica', 1, 399.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 1, '2019-05-11', 'spódnica', 5, 99.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 2, '2019-06-22', 'spódnica', 7, 49.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 2, '2019-02-02', 'spodnie', 1, 49.99);
+
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 4, '2019-04-12', 'spodnie', 2, 239.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 2, '2019-07-11', 'podkoszulka', 3, 33.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 2, '2019-03-01', 'spodnie', 2, 199.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 1, '2019-02-02', 'podkoszulka', 2, 89.99);
+
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (1, 4, '2019-03-12', 'spódnica', 1, 149.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (2, 1, '2019-04-11', 'spodnie', 1, 129.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 1, '2019-05-11', 'spódnica', 5, 69.99);
+INSERT INTO purchase (customer_id, shop_id, purchased_date, product_name, quantity, price_per_piece) VALUES (3, 2, '2019-06-22', 'spodnie', 7, 79.99);
+
+-- Exercises to get along with data and table operations
+
+CREATE TABLE IF NOT EXISTS shopper(
+first_name VARCHAR(45),
+last_name VARCHAR(45)
+);
+
+ALTER TABLE shopper ADD (
+id INT(10),
+nr_pesel INT(11)
+);
+
+ALTER TABLE shopper MODIFY id BIGINT(20);
+ALTER TABLE shopper MODIFY nr_pesel VARCHAR (11);
+
+ALTER TABLE shopper RENAME COLUMN nr_pesel TO pesel;
+
+ALTER TABLE shopper drop first_name;
+
+RENAME TABLE shopper TO customer;
+DROP TABLE customer;
+
+CREATE TABLE customer(
+id INT(20) NOT NULL UNIQUE,
+first_name VARCHAR(45),
+last_name VARCHAR(45),
+pesel INT(11) UNIQUE,
+PRIMARY KEY (id)
+);
+
+ALTER TABLE customer MODIFY pesel CHAR(11) UNIQUE;
+
+CREATE TABLE loyalty_card(
+customer_id BIGINT(20) NOT NULL UNIQUE,
+code VARCHAR(10) NOT NULL UNIQUE,
+discount TINYINT(2) NOT NULL DEFAULT 3 CHECK(discount<=10),
+valid_from DATE NOT NULL,
+valid_to DATE NOT NULL,
+PRIMARY KEY (customer_id),
+FOREIGN KEY (customer_id) REFERENCES customer(id)
+);
+
+drop table customer;
+CREATE TABLE customer(
+id BIGINT(20) ,
+first_name VARCHAR(45),
+last_name VARCHAR(45),
+pesel INT(11) UNIQUE,
+PRIMARY KEY (id)
+);
+DROP TABLE customer;
+
+CREATE TABLE shop(
+id BIGINT(20) AUTO_INCREMENT,
+name VARCHAR(20) NOT NULL UNIQUE,
+code VARCHAR(10) NOT NULL UNIQUE,
+address VARCHAR (50),
+PRIMARY KEY (id)
+);
+
+CREATE TABLE purchase(
+id BIGINT(20) AUTO_INCREMENT,
+shop_id BIGINT(20) NOT NULL,
+purchased_date DATE NOT NULL,
+product_name VARCHAR(50) NOT NULL,
+quantity INT NOT NULL,
+price_per_piece DECIMAL(6,2) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (shop_id) REFERENCES shop(id)
+);
+
+drop table purchase;
+ALTER TABLE purchase ADD (customer_id BIGINT(20) NOT NULL);
+ALTER TABLE purchase ADD FOREIGN KEY (customer_id)
+REFERENCES customer(id);
+
+CREATE TABLE payment_method(
+id BIGINT(20) AUTO_INCREMENT,
+code CHAR(1) NOT NULL UNIQUE,
+description VARCHAR(30) NOT NULL,
+PRIMARY KEY (id)
+);
+
+CREATE TABLE shop_payment_method (
+shop_id BIGINT(20),
+payment_method_id BIGINT(20),
+created_by VARCHAR(20) NOT NULL,
+created_date DATETIME NOT NULL,
+PRIMARY KEY(shop_id,payment_method_id),
+FOREIGN KEY (shop_id) REFERENCES shop(id),
+FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
+);
+
+ALTER TABLE customer MODIFY pesel CHAR(11) UNIQUE NOT NULL;
+INSERT INTO customer (id,first_name,last_name,pesel) VALUES (1, 'Tomasz','Kowalski','12312312312');
+
+DELETE FROM customer WHERE id=1;
+
+INSERT INTO customer (id,first_name,last_name,pesel) VALUES (2, 'Monika','Adamiec','35463781221');
+INSERT INTO customer (id,first_name,last_name,pesel) VALUES (3, 'Marek','Koniarek','4445556667');
+INSERT INTO customer (id,first_name,last_name,pesel) VALUES (1, 'Andrzej','Kowalski','15312312312');
+INSERT INTO customer (id,pesel) VALUES (4,'17312312312');
+INSERT INTO loyalty_card (customer_id,code,valid_from,valid_to) VALUES (1,'CARD0001','2015-05-05','2019-06-06');
+INSERT INTO loyalty_card (customer_id,discount,valid_from,valid_to) VALUES (1,4,'2015-05-05','2019-06-06');
+INSERT INTO loyalty_card (customer_id,code,discount,valid_from,valid_to) VALUES (1,'CARD0001',15,'2015-05-05','2019-06-06');
+
+UPDATE customer SET first_name='Hipolit';
+SELECT * FROM customer;
+
+UPDATE customer SET first_name='Hipolit' WHERE id-1;
+SELECT * FROM customer;
+UPDATE customer SET first_name='Robert', last_name='Trybala' WHERE id=2;
+SELECT * FROM customer;
+
+INSERT INTO shop (id,name,code,address) VALUES (1,'Adidas','A1','Szefcowa 7');
+INSERT INTO shop (id,name,code,address) VALUES (2,'Zara','Z1','Perfumowa 7');
+
+DELETE FROM shop;
+INSERT INTO shop (id,name,code,address) VALUES (3,'Adida','A2','Szefcowa 8');
+SELECT * FROM shop;
+
+DELETE FROM loyalty_card;
+INSERT INTO shop (name,code,address) VALUES ('Adidas','A1','Szefcowa 7');
+
+INSERT INTO loyalty_card (customer_id,code,discount,valid_from,valid_to) VALUES (2,'CARD0001',6,'2015-05-05','2019-06-06');
+INSERT INTO loyalty_card (customer_id,code,discount,valid_from,valid_to) VALUES (3,'CARD0002',5,'2015-07-07','2019-06-06');
+SELECT * fROM customer;
+SELECT * FROM loyalty_card;
+
+DELETE FROM loyalty_card WHERE customer_id=2;
+DELETE FROM customer where id=3;
+
+ALTER TABLE loyalty_card DROP FOREIGN KEY loyalty_card_ibfk_1;
+ALTER TABLE loyalty_card ADD FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE CASCADE;
+
+DELETE FROM customer where id=3; 
+
+use courses;
+
+SELECT * FROM course_status cs,course c WHERE cs.id=c.course_status_id AND value='W trakcie';
+
+SELECT * FROM location l ,city c WHERE c.value='Łódź' AND l.street LIKE 'Prusa%';
+
+SELECT * FROM location l
+JOIN city ci ON l.city_id = ci.id
+WHERE ci.value = 'Łódź' AND l.street LIKE '%Prusa%';
+
+
+SELECT * FROM location;
+
+SELECT * FROM trainer t 
+JOIN module m ON t.id=m.trainer_id
+WHERE m.name='Projekt końcowy' AND t.last_name NOT LIKE 'M%';
+
+SELECT * FROM attendee a 
+JOIN course_attendee ca ON a.id=ca.attendee_id
+JOIN course c ON ca.course_id=c.id
+JOIN course_name cn ON c.course_name_id=cn.id
+WHERE cn.value='Tester Oprogramowania PRO';
+
+SELECT * FROM course c
+JOIN module m ON m.course_id=c.id
+JOIN trainer t ON m.trainer_id=t.id
+WHERE t.first_name='Sławomir';
+
+SELECT * FROM course c
+JOIN location l ON l.id=c.location_id
+JOIN city ci ON l.city_id=ci.id
+WHERE ci.value='Gdańsk';
