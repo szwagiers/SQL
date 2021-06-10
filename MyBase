@@ -1,0 +1,74 @@
+DROP SCHEMA IF EXISTS mojabaza;
+CREATE SCHEMA IF NOT EXISTS mojabaza DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_polish_ci;
+use mojabaza;
+
+
+CREATE TABLE users(
+id BIGINT(20) unique auto_increment,
+first_name VARCHAR(45), 
+last_name VARCHAR (45),
+birth date not null,
+gender enum ('M', 'F'),
+PRIMARY KEY (id) );
+
+
+ALTER TABLE users ADD(
+login VARCHAR (20)
+);
+
+INSERT INTO users (first_name, last_name,birth,gender,login) VALUES ('Michael','Johnson','1990-05-01','M','MJ');
+INSERT INTO users (first_name, last_name,birth,gender,login) VALUES ('Anna','Michael','1988-11-11','F','Rosy');
+INSERT INTO users (first_name, last_name,birth,gender,login) VALUES ('Bartolomeo','Uno','2001-01-01','M','ZorroOne');
+INSERT INTO users (first_name, last_name,birth,gender,login) VALUES ('Joanna','Growling','1995-11-12','F','Grrrrr');
+
+SELECT * FROM users;
+
+
+CREATE TABLE games (
+game_id BIGINT(20) unique NOT NULL ,
+game_name VARCHAR(40),
+price INT(10),
+type ENUM ('STRATEGY', 'FPS' , 'RPG', 'RACING', 'SIMULATION'),
+player_id BIGINT(20) UNIQUE NOT NULL AUTO_INCREMENT ,
+PRIMARY KEY (game_id),
+FOREIGN KEY (player_id) REFERENCES users (id));
+
+INSERT INTO games (game_id,game_name,price,type) VALUES (1,'Sword of Destinz',19.99,'RPG');
+INSERT INTO games (game_id,game_name,price,type) VALUES (2,'Need for Adrenaline',25.99,'RACING');
+INSERT INTO games (game_id,game_name,price,type) VALUES (3,'Kingdoms',34.00,'Strategy');
+INSERT INTO games (game_id,game_name,price,type) VALUES (4,'Holo',35.00,'SIMULATION');
+
+UPDATE games SET game_name='Sword of Destiny' WHERE  game_id=1;
+
+SELECT first_name, MAX(birth) FROM users;
+
+SELECT player_id,first_name,last_name,game_name,price
+FROM users
+JOIN games ON users.id=games.player_id;
+
+
+CREATE TABLE rent(
+account_id BIGINT(20) UNIQUE NOT NULL AUTO_INCREMENT,
+account_status ENUM('ACTIVE','CLOSED', 'SUSPENDED'),
+balance DECIMAL(5,2) NOT NULL ,
+FOREIGN KEY (account_id) REFERENCES users(id) );
+
+DROP TABLE rent;
+SELECT * FROM rent;
+
+INSERT INTO rent (account_status,balance) VALUES ('ACTIVE',524.12);
+INSERT INTO rent (account_status,balance) VALUES ('ACTIVE',12.10);
+INSERT INTO rent (account_status,balance) VALUES ('SUSPENDED',-0.23);
+INSERT INTO rent (account_status,balance) VALUES ('ACTIVE',-7);
+
+SELECT account_id FROM rent
+WHERE balance <0;
+
+SELECT * FROM rent;
+
+SELECT first_name,last_name,id, account_id,balance,account_status,game_name FROM users
+JOIN games ON users.id=games.player_id
+JOIN rent ON rent.account_id=users.id
+WHERE account_status='SUSPENDED';
+
+SELECT * FROM users;
